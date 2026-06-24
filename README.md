@@ -1,6 +1,7 @@
 # SiJimat - Sistem Jadwal Imam Tarawih
 
 SiJimat hadir menjadi solusi digital untuk pengurus masjid dalam mengelola jadwal imam tarawih bulan ramadan dengan mudah dan efisien.
+
 ---
 
 ## Fitur Utama
