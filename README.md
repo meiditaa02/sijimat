@@ -1,83 +1,109 @@
-# SiJimat
+# SiJimat — Sistem Jadwal Imam Tarawih
 
-SiJimat adalah aplikasi web untuk membantu pengurus masjid mengelola jadwal imam tarawih. Aplikasi ini dibuat dengan Next.js dan Supabase, dengan pembagian akses untuk admin, imam, dan user.
+SiJimat adalah aplikasi web untuk membantu pengurus masjid menyusun dan memantau jadwal imam tarawih secara digital. Tidak perlu kertas, tidak perlu grup WhatsApp yang ribet — semua terkelola dari satu tempat.
 
-## Fitur
+---
 
-- Login berdasarkan role admin, imam, dan user.
-- Dashboard berbeda untuk setiap role.
-- Admin dapat mengelola role pengguna.
-- Admin dapat menambah, mengedit, dan menghapus data imam.
-- Admin dapat menambah, mengedit, mengganti, dan menghapus jadwal tarawih.
-- Imam dapat mengisi data imam satu kali dan mengeditnya melalui halaman profil.
-- Imam dapat mengonfirmasi jadwal dengan status bisa hadir atau berhalangan.
-- User dapat melihat jadwal publik.
-- Navbar dashboard dipisahkan dari landing page.
+## Fitur Utama
+
+**Untuk Admin**
+- Kelola akun imam dan atur role pengguna
+- Tambah, edit, dan hapus jadwal tarawih 30 malam
+- Ubah status jadwal: Terjadwal, Dikonfirmasi, Berhalangan, Diganti
+- Balas pesan masuk dari imam langsung di dashboard
+- Export jadwal ke CSV atau copy ke WhatsApp
+
+**Untuk Imam**
+- Daftar akun dan lengkapi data diri sekali saja
+- Lihat jadwal pribadi dan konfirmasi kehadiran
+- Atur pengingat jadwal lewat email (1 jam, 6 jam, 1 hari, atau 7 hari sebelum bertugas)
+- Kirim pesan/laporan ke admin dan terima balasan di dashboard
+
+**Untuk Publik**
+- Lihat jadwal tarawih lengkap 30 malam tanpa perlu login
+
+---
 
 ## Teknologi
 
-- Next.js 14
-- React 18
-- Supabase
-- Zod
+| Layer | Teknologi |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Frontend | React 18, inline styling |
+| Backend | Next.js Server Actions & API Routes |
+| Database | Supabase (PostgreSQL) |
+| Auth | Custom session via cookie |
+| Email | Resend |
+| Validasi | Zod |
+| Hosting | Vercel |
+| Cron | cron-job.org |
+
+---
 
 ## Instalasi
 
-Clone repository, lalu install dependency:
-
 ```bash
+git clone https://github.com/meiditaa02/sijimat.git
+cd sijimat
 npm install
 ```
 
-Buat file `.env.local`, lalu isi konfigurasi Supabase:
+Buat file `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=isi_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=isi_anon_key_supabase
-SUPABASE_SERVICE_ROLE_KEY=isi_service_role_key_supabase
-NEXT_PUBLIC_SITE_URL=http://localhost:3001
+NEXT_PUBLIC_SUPABASE_ANON_KEY=isi_anon_key
+SUPABASE_SERVICE_ROLE_KEY=isi_service_role_key
+RESEND_API_KEY=isi_resend_api_key
+CRON_SECRET=isi_cron_secret
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Jalankan aplikasi:
+Jalankan:
 
 ```bash
-npm run dev -- --port 3001
+npm run dev
 ```
 
-Buka aplikasi di browser:
+---
 
-```text
-http://localhost:3001
+## Setup Database
+
+Jalankan file SQL berikut di Supabase SQL Editor secara berurutan:
+
+1. `data/schema-jadwal.sql`
+2. `data/schema-update-role-jadwal.sql`
+
+Tabel yang dibutuhkan: `users`, `imam`, `jadwal`, `pesan`, `balasan_pesan`
+
+---
+
+## Akun Demo Admin
+
 ```
-
-## Database
-
-File SQL untuk Supabase ada di folder `data/`.
-
-- `data/schema-jadwal.sql`
-- `data/schema-update-role-jadwal.sql`
-
-Jalankan SQL tersebut di Supabase SQL Editor agar tabel dan kolom yang dibutuhkan tersedia.
-
-## Akun Demo
-
-Admin demo:
-
-```text
 username: admin
 password: sijimat123
 ```
 
+---
+
 ## Struktur Folder
 
-```text
-app/          Halaman dan route Next.js
-components/   Komponen UI aplikasi
-data/         File data dan SQL Supabase
-lib/          Konfigurasi dan helper Supabase
-public/       Asset publik seperti logo
+```
+app/           Halaman dan API routes
+components/    Komponen UI
+data/          File SQL dan data dummy
+lib/           Konfigurasi Supabase
+public/        Asset (logo, ikon)
 ```
 
-## Catatan
+---
 
-File `.env.local`, `.next`, `node_modules`, dan file log tidak perlu di-upload ke GitHub karena berisi data lokal, hasil build, atau dependency yang bisa dibuat ulang.
+## Notifikasi Email Otomatis
+
+Notifikasi pengingat jadwal dikirim lewat **Resend** dan dipicu oleh cron job dari **cron-job.org** setiap jam. Imam bisa memilih interval pengingat di halaman profil.
+
+Setup cron di cron-job.org:
+- URL: `https://domain-kamu.vercel.app/api/cron-remind`
+- Schedule: `*/30 * * * *`
+- Header: `Authorization: Bearer [CRON_SECRET]`
