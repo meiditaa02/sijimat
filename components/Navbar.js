@@ -3,17 +3,34 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function Navbar() {
   const pathname = usePathname()
+  const [activeHash, setActiveHash] = useState('')
+
+  useEffect(() => {
+    setActiveHash(window.location.hash)
+
+    const handleHashChange = () => setActiveHash(window.location.hash)
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  function isActive(href) {
+    if (href === '/') return pathname === '/' && activeHash === ''
+    if (href === '/jadwal') return pathname === '/jadwal'
+    if (href.startsWith('/#')) return pathname === '/' && activeHash === href.slice(1)
+    return false
+  }
 
   const linkStyle = (href) => ({
     textDecoration: 'none',
-    color: pathname === href ? '#059669' : '#374151',
-    fontWeight: pathname === href ? '700' : '600',
+    color: isActive(href) ? '#059669' : '#374151',
+    fontWeight: isActive(href) ? '700' : '600',
     fontSize: '0.9rem',
     paddingBottom: '2px',
-    borderBottom: pathname === href ? '2px solid #059669' : '2px solid transparent',
+    borderBottom: isActive(href) ? '2px solid #059669' : '2px solid transparent',
     transition: 'color 0.2s',
     whiteSpace: 'nowrap',
   })
@@ -67,11 +84,11 @@ export default function Navbar() {
         </Link>
 
         <nav className="public-nav" aria-label="Navigasi utama" style={{ display: 'flex', alignItems: 'center', gap: '1.35rem' }}>
-          <Link href="/" style={linkStyle('/')}>Home</Link>
+          <Link href="/" onClick={() => setActiveHash('')} style={linkStyle('/')}>Home</Link>
           <Link href="/jadwal" style={linkStyle('/jadwal')}>Jadwal</Link>
-          <Link href="/#features" style={linkStyle('/#features')}>Fitur</Link>
-          <Link href="/#cara-kerja" style={linkStyle('/#cara-kerja')}>Cara Kerja</Link>
-          <Link href="/#testimonial" style={linkStyle('/#testimonial')}>Ulasan</Link>
+          <Link href="/#features" onClick={() => setActiveHash('#features')} style={linkStyle('/#features')}>Fitur</Link>
+          <Link href="/#cara-kerja" onClick={() => setActiveHash('#cara-kerja')} style={linkStyle('/#cara-kerja')}>Cara Kerja</Link>
+          <Link href="/#testimonial" onClick={() => setActiveHash('#testimonial')} style={linkStyle('/#testimonial')}>Ulasan</Link>
         </nav>
 
         <div className="public-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>

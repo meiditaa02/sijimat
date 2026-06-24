@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 import PublicSchedule from '../../components/PublicSchedule'
@@ -40,7 +39,6 @@ function buildThirtyNightSchedule(schedules = []) {
 export default async function JadwalPage() {
   const role = cookies().get('session_role')?.value
   const isLoggedIn = Boolean(cookies().get('session')?.value)
-  const dashboardHome = role === 'admin' ? '/dashboard' : role === 'imam' ? '/dashboard-imam' : '/dashboard-user'
 
   const { data: schedules } = await supabase
     .from('jadwal')
@@ -51,25 +49,14 @@ export default async function JadwalPage() {
 
   return (
     <>
-      {isLoggedIn && (
-        <DashboardHeader role={role || 'user'} />
-      )}
+      {isLoggedIn && <DashboardHeader role={role || 'imam'} />}
       {!isLoggedIn && <Navbar />}
       <main style={{ padding: isLoggedIn ? '2rem 1rem' : '4rem 0', background: '#f8fafc', minHeight: '100vh' }}>
         <div className="container">
-          <Link
-            href={isLoggedIn ? dashboardHome : '/'}
-            style={{ color: 'var(--accent-teal)', textDecoration: 'none', fontWeight: 700 }}
-          >
-            {isLoggedIn ? '← Kembali ke Dashboard' : '← Kembali ke Beranda'}
-          </Link>
-
-          <div style={{ marginTop: '2rem' }}>
-            <PublicSchedule
-              schedules={publicSchedules}
-              title="Jadwal Lengkap 30 Malam"
-            />
-          </div>
+          <PublicSchedule
+            schedules={publicSchedules}
+            title="Jadwal Lengkap 30 Malam"
+          />
         </div>
       </main>
       {!isLoggedIn && <Footer />}
