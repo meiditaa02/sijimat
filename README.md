@@ -1,6 +1,6 @@
-# SiJimat — Sistem Jadwal Imam Tarawih
+# SiJimat - Sistem Jadwal Imam Tarawih
 
-SiJimat adalah aplikasi web untuk membantu pengurus masjid menyusun dan memantau jadwal imam tarawih secara digital. Tidak perlu kertas, tidak perlu grup WhatsApp yang ribet — semua terkelola dari satu tempat.
+SiJimat hadir untuk membantu pengurus masjid menyusun dan memantau jadwal imam tarawih secara digital agar rapi, mudah, dan tidak ribet.
 
 ---
 
@@ -10,14 +10,14 @@ SiJimat adalah aplikasi web untuk membantu pengurus masjid menyusun dan memantau
 - Kelola akun imam dan atur role pengguna
 - Tambah, edit, dan hapus jadwal tarawih 30 malam
 - Ubah status jadwal: Terjadwal, Dikonfirmasi, Berhalangan, Diganti
-- Balas pesan masuk dari imam langsung di dashboard
+- Balas laporan masuk dari imam langsung di dashboard
 - Export jadwal ke CSV atau copy ke WhatsApp
 
 **Untuk Imam**
 - Daftar akun dan lengkapi data diri sekali saja
 - Lihat jadwal pribadi dan konfirmasi kehadiran
 - Atur pengingat jadwal lewat email (1 jam, 6 jam, 1 hari, atau 7 hari sebelum bertugas)
-- Kirim pesan/laporan ke admin dan terima balasan di dashboard
+- Kirim pesan atau laporan ke admin dan menerima balasan di dashboard
 
 **Untuk Publik**
 - Lihat jadwal tarawih lengkap 30 malam tanpa perlu login
@@ -28,8 +28,8 @@ SiJimat adalah aplikasi web untuk membantu pengurus masjid menyusun dan memantau
 
 | Layer | Teknologi |
 |---|---|
-| Framework | Next.js 14 (App Router) |
-| Frontend | React 18, inline styling |
+| Framework | Next.js 14 |
+| Frontend | React 18 |
 | Backend | Next.js Server Actions & API Routes |
 | Database | Supabase (PostgreSQL) |
 | Auth | Custom session via cookie |
@@ -73,8 +73,6 @@ Jalankan file SQL berikut di Supabase SQL Editor secara berurutan:
 
 1. `data/schema-jadwal.sql`
 2. `data/schema-update-role-jadwal.sql`
-
-Tabel yang dibutuhkan: `users`, `imam`, `jadwal`, `pesan`, `balasan_pesan`
 
 ---
 
