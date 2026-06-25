@@ -1,3 +1,4 @@
+// app/api/cron-remind/route.js
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
@@ -17,11 +18,11 @@ export async function GET(request) {
   try {
     const sekarang = new Date()
 
-    // ambil jadwal hari ini dan yang akan datang
     const { data: daftarJadwal, error: errorJadwal } = await supabase
       .from('jadwal')
       .select(`
         id,
+        malam,
         tanggal,
         waktu,
         nama_masjid,
@@ -40,36 +41,38 @@ export async function GET(request) {
 
     const emailSent = []
 
-    // cek kecocokan waktu
     for (const jadwal of daftarJadwal) {
       if (!jadwal.imam || !jadwal.imam.user?.email) continue
 
       const emailImam = jadwal.imam.user.email
       const namaImam = jadwal.imam.nama
       const interval = jadwal.imam.reminder_interval || '1-day'
-      
-      const stringTanggal = jadwal.tanggal.split('T')[0]
-      let stringWaktu = '19:30:00'
 
-      // ubah format "19.30 WIB" menjadi "19:30:00" 
+      const stringTanggal = jadwal.tanggal.split('T')[0]
+      let jamWIB = 19
+      let menitWIB = 30
+
       if (jadwal.waktu) {
-        let bersih = jadwal.waktu.replace('WIB', '').trim(); 
-        bersih = bersih.replace('.', ':'); 
-        if (bersih.split(':').length === 2) {
-          bersih += ':00'; 
+        const bersih = jadwal.waktu.replace('WIB', '').trim()
+        const parts = bersih.split('.')
+        if (parts.length === 2) {
+          jamWIB = parseInt(parts[0], 10)
+          menitWIB = parseInt(parts[1], 10)
         }
-        stringWaktu = bersih;
       }
 
-      // Gabungkan kolom tanggal dan waktu menjadi satu objek Date utuh
-      const waktuTugas = new Date(`${stringTanggal}T${stringWaktu}`)
-      
+      // Konversi WIB ke UTC: kurangi 7 jam
+      const jamUTC = jamWIB - 7
+      const [tahun, bulan, hari] = stringTanggal.split('-').map(Number)
+
+      // Buat waktu tugas dalam UTC
+      const waktuTugas = new Date(Date.UTC(tahun, bulan - 1, hari, jamUTC, menitWIB, 0))
+
       const selisihMilidetik = waktuTugas - sekarang
       const selisihJam = selisihMilidetik / (1000 * 60 * 60)
 
       let harusKirim = false
 
-      // Logika pengecekan cron
       if (interval === '1-hour' && selisihJam > 0 && selisihJam <= 1) {
         harusKirim = true
       } else if (interval === '6-hours' && selisihJam > 5 && selisihJam <= 6) {
@@ -80,28 +83,28 @@ export async function GET(request) {
         harusKirim = true
       }
 
-      // Eksekusi kirim email lewat Resend 
       if (harusKirim) {
         await resend.emails.send({
           from: 'SiJimat <onboarding@resend.dev>',
           to: emailImam,
-          subject: `✨ Pengingat Jadwal Imam Tarawih - Malam ke-${jadwal.malam || '30'}`,
+          subject: `✨ Pengingat Jadwal Imam Tarawih - Malam ke-${jadwal.malam || '?'}`,
           html: `
             <div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.5;">
               <h2>Assalamu'alaikum Wr. Wb. ${namaImam},</h2>
-              <p>Ini adalah pengingat otomatis dari aplikasi <strong>SiJimat</strong> mengenai jadwal tugas Anda malam ini:</p>
+              <p>Ini adalah pengingat otomatis dari aplikasi <strong>SiJimat</strong> mengenai jadwal tugas Anda:</p>
               <div style="background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; margin: 15px 0; max-width: 450px;">
                 <p style="margin: 4px 0;"><strong>Tanggal:</strong> ${stringTanggal}</p>
-                <p style="margin: 4px 0;"><strong>Jam Tugas:</strong> ${jadwal.waktu} </p>
-                <p style="margin: 4px 0;"><strong>Keterangan:</strong> Tarawih Malam ke-${jadwal.malam || '30'}</p>
+                <p style="margin: 4px 0;"><strong>Jam Tugas:</strong> ${jadwal.waktu}</p>
+                <p style="margin: 4px 0;"><strong>Keterangan:</strong> Tarawih Malam ke-${jadwal.malam || '?'}</p>
+                <p style="margin: 4px 0;"><strong>Masjid:</strong> ${jadwal.nama_masjid}</p>
               </div>
-              <p>Mohon kehadirannya tepat waktu dan mempersiapkan diri dengan sebaik-baiknya. Terima kasih.</p>
+              <p>Mohon kehadirannya tepat waktu. Terima kasih.</p>
               <hr style="border: none; border-top: 1px solid #eee; margin-top: 30px;" />
               <p style="font-size: 0.8rem; color: #999;">Sistem Jadwal Imam Tarawih (SiJimat)</p>
             </div>
-          `
+          `,
         })
-        emailSent.push({ imam: namaImam, email: emailImam })
+        emailSent.push({ imam: namaImam, email: emailImam, malam: jadwal.malam })
       }
     }
 

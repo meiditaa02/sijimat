@@ -1,11 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function NotificationSettingForm({ label, description }) {
   const [interval, setIntervalState] = useState('1-day')
   const [statusMessage, setStatusMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
+
+  useEffect(() => {
+    async function loadSetting() {
+      try {
+        const res = await fetch('/api/remind-notification')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.interval) setIntervalState(data.interval)
+        }
+      } catch {
+        // biarkan default
+      } finally {
+        setFetching(false)
+      }
+    }
+    loadSetting()
+  }, [])
 
   const handleSave = async () => {
     setLoading(true)
@@ -14,22 +32,19 @@ export default function NotificationSettingForm({ label, description }) {
       const res = await fetch('/api/remind-notification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interval })
+        body: JSON.stringify({ interval }),
       })
 
       if (res.ok) {
-        setStatusMessage('Preferensi waktu pengingat berhasil disimpan ke database!')
+        setStatusMessage('Preferensi waktu pengingat berhasil disimpan!')
       } else {
         setStatusMessage('Gagal menyimpan preferensi. Coba lagi.')
       }
-    } catch (err) {
+    } catch {
       setStatusMessage('Terjadi kesalahan jaringan.')
     } finally {
       setLoading(false)
-      // Menghilangkan pesan setelah 3 detik
-      setTimeout(() => {
-        setStatusMessage('')
-      }, 3000)
+      setTimeout(() => setStatusMessage(''), 3000)
     }
   }
 
@@ -44,27 +59,27 @@ export default function NotificationSettingForm({ label, description }) {
       borderRadius: '12px',
     }}>
       <div>
-        <div style={{ color: '#111827', fontWeight: '700', fontSize: '#0.92rem' }}>{label}</div>
+        <div style={{ color: '#111827', fontWeight: '700', fontSize: '0.92rem' }}>{label}</div>
         <div style={{ color: '#6b7280', fontSize: '0.8rem', marginTop: '0.15rem' }}>{description}</div>
       </div>
 
-      <div style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        alignItems: 'center', 
-        gap: '0.75rem', 
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '0.75rem',
         marginTop: '0.25rem',
         borderTop: '1px dashed #e5e7eb',
-        paddingTop: '0.85rem'
+        paddingTop: '0.85rem',
       }}>
         <label htmlFor="reminder-interval" style={{ fontSize: '0.82rem', color: '#374151', fontWeight: '700' }}>
           Waktu Pengingat:
         </label>
-        <select 
+        <select
           id="reminder-interval"
           value={interval}
           onChange={(e) => setIntervalState(e.target.value)}
-          disabled={loading}
+          disabled={loading || fetching}
           style={{
             padding: '0.45rem 0.65rem',
             borderRadius: '8px',
@@ -73,8 +88,9 @@ export default function NotificationSettingForm({ label, description }) {
             color: '#111827',
             fontSize: '0.82rem',
             fontWeight: '600',
+            fontFamily: 'inherit',
             outline: 'none',
-            cursor: 'pointer',
+            cursor: fetching ? 'wait' : 'pointer',
           }}
         >
           <option value="1-hour">1 jam sebelum menjadi imam</option>
@@ -82,20 +98,21 @@ export default function NotificationSettingForm({ label, description }) {
           <option value="1-day">Sehari sebelum menjadi imam</option>
           <option value="7-days">Seminggu sebelum menjadi imam</option>
         </select>
-        
-        <button 
-          type="button" 
+
+        <button
+          type="button"
           onClick={handleSave}
-          disabled={loading}
+          disabled={loading || fetching}
           style={{
             padding: '0.45rem 0.85rem',
             borderRadius: '8px',
-            background: loading ? '#9ca3af' : '#059669',
+            background: loading || fetching ? '#9ca3af' : '#059669',
             color: 'white',
             border: 'none',
             fontSize: '0.82rem',
             fontWeight: '700',
-            cursor: 'pointer',
+            fontFamily: 'inherit',
+            cursor: loading || fetching ? 'not-allowed' : 'pointer',
             marginLeft: 'auto',
           }}
         >
@@ -105,15 +122,14 @@ export default function NotificationSettingForm({ label, description }) {
 
       {statusMessage && (
         <div style={{
-          marginTop: '0.5rem',
           padding: '0.6rem 0.85rem',
           background: statusMessage.includes('Gagal') || statusMessage.includes('kesalahan') ? '#fef2f2' : '#ecfdf5',
-          border: statusMessage.includes('Gagal') || statusMessage.includes('kesalahan') ? '1px solid #fca5a5' : '1px solid #a7f3d0',
+          border: `1px solid ${statusMessage.includes('Gagal') || statusMessage.includes('kesalahan') ? '#fca5a5' : '#a7f3d0'}`,
           borderRadius: '8px',
           color: statusMessage.includes('Gagal') || statusMessage.includes('kesalahan') ? '#991b1b' : '#065f46',
           fontSize: '0.82rem',
           fontWeight: '600',
-          textAlign: 'center'
+          textAlign: 'center',
         }}>
           {statusMessage}
         </div>
