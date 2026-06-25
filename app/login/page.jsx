@@ -1,6 +1,3 @@
-// app/login/page.jsx
-// Halaman login sederhana dengan cookie session
-
 'use client'
 
 import { useState } from 'react'
@@ -36,9 +33,8 @@ export default function LoginPage() {
       const dashboardByRole = {
         admin: '/dashboard',
         imam: '/dashboard-imam',
-        user: '/dashboard-user',
       }
-      const targetPath = dashboardByRole[payload.role] || '/dashboard-user'
+      const targetPath = dashboardByRole[payload.role] || '/dashboard-imam'
       router.push(targetPath)
       router.refresh()
     } catch {
@@ -67,24 +63,15 @@ export default function LoginPage() {
         border: '1px solid #f0fdf4',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <img
-            src="/logo.png"
-            alt="SiJimat"
-            style={{ width: '48px', height: '48px', objectFit: 'contain', marginBottom: '0.5rem' }}
-          />
+          <img src="/logo.png" alt="SiJimat" style={{ width: '48px', height: '48px', objectFit: 'contain', marginBottom: '0.5rem' }} />
           <h1 style={{ fontSize: '1.4rem', fontWeight: '700', color: '#111' }}>Masuk Akun</h1>
           <p style={{ fontSize: '0.85rem', color: '#6b7280' }}>SiJimat Dashboard</p>
         </div>
 
         {error && (
           <div style={{
-            background: '#fef2f2',
-            border: '1px solid #fca5a5',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            marginBottom: '1rem',
+            background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b',
+            padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '0.875rem', marginBottom: '1rem',
           }}>
             Gagal: {error}
           </div>
@@ -93,17 +80,14 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '4px' }}>
-              Email
+              Email / Username
             </label>
             <input
               name="identifier"
               type="text"
               placeholder="email@domain.com"
               required
-              style={{
-                width: '100%', padding: '0.6rem 1rem', borderRadius: '10px',
-                border: '1px solid #d1fae5', fontSize: '0.95rem', boxSizing: 'border-box',
-              }}
+              style={{ width: '100%', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #d1fae5', fontSize: '0.95rem', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -116,10 +100,7 @@ export default function LoginPage() {
               type="password"
               placeholder="********"
               required
-              style={{
-                width: '100%', padding: '0.6rem 1rem', borderRadius: '10px',
-                border: '1px solid #d1fae5', fontSize: '0.95rem', boxSizing: 'border-box',
-              }}
+              style={{ width: '100%', padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #d1fae5', fontSize: '0.95rem', boxSizing: 'border-box' }}
             />
           </div>
 
@@ -129,8 +110,7 @@ export default function LoginPage() {
             style={{
               width: '100%', padding: '0.75rem', borderRadius: '10px',
               background: loading ? '#6ee7b7' : '#059669', color: 'white',
-              border: 'none', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: '1rem',
+              border: 'none', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '1rem',
             }}
           >
             {loading ? 'Masuk...' : 'Masuk'}
