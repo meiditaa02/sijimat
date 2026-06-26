@@ -89,7 +89,7 @@ export default async function HomePage() {
               </h1>
 
               <p className="hero-desc reveal">
-                SiJimat membantu pengurus masjid menyusun dan memantau jadwal imam tarawih secara digital tanpa ribet, tanpa bentrok, tanpa kertas.
+                SiJimat hadir sebagai solusi digital bagi pengurus masjid untuk menyusun dan memantau jadwal imam tarawih dengan lebih mudah dan teratur.
               </p>
 
               <div className="hero-actions reveal">
